@@ -1,5 +1,5 @@
 # Deep Learning for Abstract Argumentation Semantics
-Code to reproduce the experiments will be published here soon
+Code to reproduce the experiments will be published here soon, please email me for questions.
 
 Published at IJCAI 2020: [https://www.ijcai.org/Proceedings/2020/231](https://www.ijcai.org/Proceedings/2020/231)
 
