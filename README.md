@@ -1,5 +1,5 @@
 # Deep Learning for Abstract Argumentation Semantics
-Code to reproduce the experiments will be published here soon, please email me for questions.
+Code to reproduce the experiments, please email me for questions.
 
 Published at IJCAI 2020: [https://www.ijcai.org/Proceedings/2020/231](https://www.ijcai.org/Proceedings/2020/231)
 
@@ -17,6 +17,8 @@ Create a virtual python environment and manually install
 before installing the requirements.txt
 
 Compile the java generators in src/data/generators/
+
+Install pynauty in the src/data/nauty directory with `./install.sh`
 
 ## Data
 Example: in order to generate a dataset named 'test-25' and consisting of 1000 graphs each containing 25 arguments, execute these commands
