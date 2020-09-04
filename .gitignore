@@ -139,4 +139,4 @@ hs_err_pid*
 # project files
 wandb/
 */open-wbo
-data/
+/data/
