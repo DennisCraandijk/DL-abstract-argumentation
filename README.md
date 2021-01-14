@@ -29,7 +29,7 @@ To generate Argumentation Frameworks we use [AFBenchGen2](https://sourceforge.ne
 Various datasets can be generated with `generate_graphs.py` and `graphs2AFs.py`
 For instance, in order to generate a dataset named 'test-ds' and consisting of 1000 graphs each containing 25 arguments, execute these commands
 ```
-python -m src.data.generate_graphs --name test-25 --min_args 25 --max_args 25 --num 10000
+python -m src.data.generate_graphs --name test-25 --min_args 25 --max_args 25 --num 1000
 python -m src.data.graphs2AFs --name test-25
 ```
 
