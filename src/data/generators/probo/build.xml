@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Set the project name, basedir and default target to be executed-->
+<project name="compile" default="mainTarget" basedir=".">
+    <!-- Sets the properties here-->
+    <property name="src.dir" location="src" />
+    <property name="build.dir" location="target" />
+    <property name="lib.dir" location="lib" />
+
+    <!-- Set the classpath-->
+    <path id="build.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <!-- Target for deleting the existing directories-->
+    <target name="clean">
+        <delete dir="${build.dir}" />
+    </target>
+
+    <!-- Target for creating the new directories-->
+    <target name="makedir">
+        <mkdir dir="${build.dir}" />
+    </target>
+
+    <!-- Target for compiling the java code-->
+    <target name="compile" depends="clean, makedir">
+        <javac srcdir="${src.dir}" destdir="${build.dir}"
+               classpathref="build.classpath" >
+        </javac>
+    </target>
+
+
+    <!-- Defualt target to run all targets-->
+    <target name="mainTarget" depends="compile">
+        <description>Main target</description>
+    </target>
+
+</project>

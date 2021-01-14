@@ -13,28 +13,18 @@ from tqdm import tqdm
 from src.data.generators.GraphGenerator import GraphGenerator
 from src.data.scripts.utils import limit_cpu, apx2nxgraph
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--num', type=int, default=10, help='Number of argument frameworks to be generated')
-parser.add_argument('--min_args', type=int, default=5, help='Minimum number of arguments')
-parser.add_argument('--max_args', type=int, default=25, help='Maximum number of arguments')
-parser.add_argument('--name', type=str, default='debug', help='Dataset name')
-parser.add_argument('--no_deduplication', dest='deduplication', action='store_false', help='Stop detecting duplicates')
-parser.add_argument('--max_processes', type=int, default=16)
-parser.set_defaults(deduplication=True)
-args = parser.parse_args()
 
 # define directories
 path = Path(__file__).parent
 data_dir = path.parent.parent / 'data'
-graphs_dir = data_dir / f'dataset/{args.name}/graphs'
 tmp_dir = data_dir / 'tmp/graphs'
 
 
-def main():
+def main(args):
     """
     Generate graphs from various AF generators used in ICCMA and save apx files in graphs_dir
     """
-
+    graphs_dir = data_dir / f'dataset/{args.name}/graphs'
     graphs_dir.mkdir(parents=True, exist_ok=True)
     tmp_dir.mkdir(parents=True, exist_ok=True)
     empty_dir(tmp_dir)
@@ -110,4 +100,13 @@ def get_isomorphic_signature(graph: DiGraph) -> str:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--num', type=int, default=10, help='Number of argument frameworks to be generated')
+    parser.add_argument('--min_args', type=int, default=5, help='Minimum number of arguments')
+    parser.add_argument('--max_args', type=int, default=25, help='Maximum number of arguments')
+    parser.add_argument('--name', type=str, default='debug', help='Dataset name')
+    parser.add_argument('--no_deduplication', dest='deduplication', action='store_false', help='Stop detecting duplicates')
+    parser.add_argument('--max_processes', type=int, default=16)
+    parser.set_defaults(deduplication=True)
+    args = parser.parse_args()
+    main(args)

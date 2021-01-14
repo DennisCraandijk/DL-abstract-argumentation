@@ -1,41 +1,43 @@
 import copy
 import pickle
-import subprocess
-import tempfile
 from pathlib import Path
 from typing import Set
 
 from networkx.classes.digraph import DiGraph
-from networkx.classes.function import set_edge_attributes, set_node_attributes, non_edges
+from networkx.classes.function import (
+    set_edge_attributes,
+    set_node_attributes,
+    non_edges,
+)
 
-from src.data.generate_graphs import get_isomorphic_signature
-from src.data.scripts.utils import apx2nxgraph, nxgraph2apx, parse_solver_output
+
+from src.data.scripts.utils import apx2nxgraph, nxgraph2apx
+from src.data.solvers.AcceptanceSolver import AcceptanceSolver
 
 
 class ArgumentationFramework:
     """Argumentation Framework class to compute extensions, determine argument acceptance
-    and get graph representations """
+    and get graph representations"""
 
     graph: DiGraph
 
     @classmethod
     def from_pkl(cls, pkl_path: Path):
-        state_dict = pickle.load(open(pkl_path, 'rb'))
+        state_dict = pickle.load(open(pkl_path, "rb"))
 
         # legacy _id
-        if '_id' in state_dict:
-            state_dict['id'] = state_dict.pop('_id')
+        if "_id" in state_dict:
+            state_dict["id"] = state_dict.pop("_id")
 
         return cls(**state_dict)
 
     @classmethod
-    def from_apx(cls, apx_file_path: Path, id=None):
+    def from_apx(cls, apx: str, id=None):
         """
         Initalize AF object from apx file
         """
-        if not id: id = apx_file_path.stem
-        with open(apx_file_path, 'r') as f:
-            graph = apx2nxgraph(f.read())
+
+        graph = apx2nxgraph(apx)
 
         return cls(id, graph)
 
@@ -46,50 +48,44 @@ class ArgumentationFramework:
         self.representations = {}
         self.id = id
 
-    def compute_extensions(self, semantic, solver_path) -> Set[frozenset]:
-        apx = nxgraph2apx(self.graph)
+    def to_apx(self):
+        return nxgraph2apx(self.graph)
 
-        # construct ICCMA solver command
-        task = 'SE' if semantic in ['GR', 'ID'] else 'EE'
-        cmd = [str(solver_path), '-fo', 'apx', '-p', '{}-{}'.format(task, semantic), '-f']
-
-        # write APX file to RAM
-        with tempfile.NamedTemporaryFile(mode='w+') as tmp_input:
-            tmp_input.write(apx)
-            tmp_input.seek(0)
-            cmd.append(tmp_input.name)
-
-            # write output file to RAM and solve
-            with tempfile.TemporaryFile(mode='w+') as tmp_output:
-                p = subprocess.run(cmd, stdout=tmp_output, stderr=subprocess.PIPE)
-                if p.stderr: raise Exception(p.stderr)
-                tmp_output.seek(0)
-
-                extensions = parse_solver_output(semantic, tmp_output)
-
-        self.extensions[semantic] = extensions
-
-        return extensions
-
-    def compute_id(self):
-        self.id = get_isomorphic_signature(self.graph)
-        return self.id
+    def edge_hamming_distance(self, AF: "ArgumentationFramework"):
+        edges1 = set(self.graph.edges)
+        edges2 = set(AF.graph.edges)
+        return len(edges1.symmetric_difference(edges2))
 
     def get_extensions_containing_s(self, semantic, S: set) -> Set[frozenset]:
-        extensions = set([extension for extension in self.extensions[semantic] if
-                          S.issubset(extension)])
+        extensions = set(
+            [
+                extension
+                for extension in self.extensions[semantic]
+                if S.issubset(extension)
+            ]
+        )
         return extensions
 
     def get_cred_accepted_args(self, semantic, S: frozenset = None) -> frozenset:
         credulous = frozenset()
-        extensions = self.extensions[semantic] if S is None else self.get_extensions_containing_s(semantic, S)
-        if len(extensions) > 0: credulous = frozenset.union(*extensions)
+        extensions = (
+            self.extensions[semantic]
+            if S is None
+            else self.get_extensions_containing_s(semantic, S)
+        )
+        if len(extensions) > 0:
+            credulous = frozenset.union(*extensions)
         return credulous
 
     def get_scept_accepted_args(self, semantic, S: frozenset = None) -> frozenset:
         sceptical = frozenset()
-        extensions = self.extensions[semantic] if S is None else self.get_extensions_containing_s(semantic, S)
-        if len(extensions) > 0: sceptical = frozenset.intersection(*extensions)
+        extensions = (
+            self.extensions[semantic]
+            if S is None
+            else self.get_extensions_containing_s(semantic, S)
+        )
+        if len(extensions) > 0:
+            sceptical = frozenset.intersection(*extensions)
         return sceptical
 
     @property
@@ -109,54 +105,86 @@ class ArgumentationFramework:
         return set(n for n in range(self.num_arguments))
 
     def get_representation(self, type) -> DiGraph:
-        assert type in ['base', 'AGNN', 'enforcement', 'FM2', 'GCN']
+        assert type in ["base", "AGNN", "enforcement", "FM2", "GCN"]
         if type not in self.representations:
-            self.representations[type] = getattr(self, f'get_{type}_representation')()
+            self.representations[type] = getattr(self, f"get_{type}_representation")()
         return self.representations[type]
 
     def get_base_representation(self) -> DiGraph:
         graph = copy.deepcopy(self.graph)
-        set_node_attributes(graph, 0, 'node_attr')
+        set_node_attributes(graph, 0, "node_input")
         return graph
 
     def get_AGNN_representation(self) -> DiGraph:
         graph = self.get_base_representation()
-        set_node_attributes(graph, 0, 'node_y')
+        set_node_attributes(graph, 0, "node_y")
         return graph
 
     def get_GCN_representation(self) -> DiGraph:
         graph = self.get_AGNN_representation()
-        set_node_attributes(graph, float(1), 'node_x')
+        set_node_attributes(graph, float(1), "node_x")
         return graph
 
     def get_FM2_representation(self) -> DiGraph:
         graph = self.get_AGNN_representation()
         for node in graph.nodes:
-            graph.nodes[node]['node_x_in'] = float(graph.in_degree(node))
-            graph.nodes[node]['node_x_out'] = float(graph.out_degree(node))
+            graph.nodes[node]["node_x_in"] = float(graph.in_degree(node))
+            graph.nodes[node]["node_x_out"] = float(graph.out_degree(node))
         return graph
 
     def get_enforcement_representation(self) -> DiGraph:
         graph = self.get_base_representation()
-        set_edge_attributes(graph, 1, 'edge_attr')
+        set_edge_attributes(graph, 1, "edge_input")
 
         for u, v in non_edges(graph):
-            graph.add_edge(u, v, edge_attr=0)
+            graph.add_edge(u, v, edge_input=0)
 
         # self attacks
         for n in graph.nodes:
             if graph.has_edge(n, n):
-                graph.edges[n, n]['edge_attr'] = 3
+                graph.edges[n, n]["edge_input"] = 3
             else:
-                graph.add_edge(n, n, edge_attr=2)
+                graph.add_edge(n, n, edge_input=2)
 
-        # # traverse all edge combinations and add if edge does not exist
-        # for u, v in combinations(graph.nodes, 2):
-        #     if not graph.has_edge(u, v):
-        #         graph.add_edge(u, v, edge_attr=0)
-        #     if not graph.has_edge(v, u):
-        #         graph.add_edge(v, u, edge_attr=0)
-
-        set_edge_attributes(graph, 0, 'edge_y')
+        set_edge_attributes(graph, 0, "edge_y")
 
         return graph
+
+    def verify(self, S: frozenset, semantics, solver=None):
+        if semantics == "ST":
+            return self.verify_stable(S)
+        elif semantics == "CO":
+            return self.verify_complete(S)
+        elif semantics in ["GR", "PR"]:
+            return self.verify_solver(S, semantics, solver)
+        else:
+            raise Exception("Semantics not known")
+
+    def verify_stable(self, S: frozenset):
+        # "the set of arguments which are not attacked by S and then testing if this set is equal to S"
+        not_attacked_by_S = self.arguments - self.attacked_by(S)
+        return S == frozenset(not_attacked_by_S)
+
+    def verify_complete(self, S: frozenset):
+        # "Compute the set of arguments defended by S, the set of arguments not attacked by S and then to test if their intersection is equal to S."
+        attacked_by_S = self.attacked_by(S)
+        defended_by_S = set()
+        for arg in self.arguments:
+            attackers = set(self.graph.predecessors(arg))
+            if attackers.issubset(attacked_by_S):
+                defended_by_S.add(arg)
+
+        not_attacked_by_S = self.arguments - attacked_by_S
+        intersection = defended_by_S.intersection(not_attacked_by_S)
+        return S == frozenset(intersection)
+
+    def verify_solver(self, S: frozenset, semantics, solver: AcceptanceSolver):
+        return S in solver.solve(self, semantics)
+
+    def attacked_by(self, S: frozenset):
+        attacked_args = set()
+        for arg in S:
+            for attacked_arg in self.graph.successors(arg):
+                attacked_args.add(attacked_arg)
+
+        return attacked_args
