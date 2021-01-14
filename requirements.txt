@@ -5,4 +5,5 @@ torch_scatter~=2.0.5
 networkx
 psutil
 pytorch-lightning~=1.1.1
+pytorch-lightning-bolts~=0.2.5
 wandb

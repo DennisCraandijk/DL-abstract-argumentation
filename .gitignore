@@ -140,3 +140,4 @@ hs_err_pid*
 wandb/
 */open-wbo
 /data/
+/models/
