@@ -15,7 +15,7 @@ class GraphGenerator:
         self.path = Path(__file__).parent.parent
         self.jAFBench = self.path / 'generators/AFBenchGen2/target/jAFBenchGen-2.jar'
         self.AFGen_cp = f'{self.path}/generators/AFGenBenchmarkGenerator/target:'
-        self.probo_cp = f'{self.path}/generators/probo/target/classes:' \
+        self.probo_cp = f'{self.path}/generators/probo/target/:' \
                         f'{self.path}/generators/probo/lib/*'
 
     def generate(self, id) -> Path:
