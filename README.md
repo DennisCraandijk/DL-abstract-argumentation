@@ -13,27 +13,21 @@ Create a virtual python 3 environment and install
 * [pytorch](https://pytorch.org/) version 1.6 
 * [pytorch_geometric](https://github.com/rusty1s/pytorch_geometric)
 
-before installing the requirements
-```
-pip install -r requirements.txt
-```
+seperately before installing the `requirements.txt`
 
-Compile the Argumentation Framework generators in the `src/data/generators/` directory with `./install.sh`. Compiling with this script requires Ant and Maven
+Go to the `src/data/generators/` directory to compile the Argumentation Framework generators with `./install.sh` (this requires Java, Ant and Maven)
 
-
-Install pynauty in the `src/data/nauty` directory with `./install.sh`
+Got to the `src/data/nauty` directory to install [pynauty](https://web.cs.dal.ca/~peter/software/pynauty/html/index.html) with `./install.sh`
 
 # Data
-To generate Argumentation Frameworks we use [AFBenchGen2](https://sourceforge.net/projects/afbenchgen/), [AFGen](http://argumentationcompetition.org/2019/papers/ICCMA19_paper_3.pdf) and [probo](https://sourceforge.net/projects/probo/) (thanks to the original authors!)
+To generate Argumentation Frameworks we use the [AFBenchGen2](https://sourceforge.net/projects/afbenchgen/), [AFGen](http://argumentationcompetition.org/2019/papers/ICCMA19_paper_3.pdf) and [probo](https://sourceforge.net/projects/probo/) generators (thanks to the original authors!)
 
-Various datasets can be generated with `generate_graphs.py` and `graphs2AFs.py`
-For instance, in order to generate a dataset named 'test-ds' and consisting of 1000 graphs each containing 25 arguments, execute these commands
+A dataset can be generated with `generate_graphs.py` (which generates .apx files) and `graphs2AFs.py` (which converts the .apx files to ArgumentationFramework objects with enumerated extensions). The generated files are stored in `data/dataset/[dataset_name]`. For instance, in order to generate a dataset named `test-ds` consisting of 1000 graphs each containing 25 arguments, execute these commands
 ```
 python -m src.data.generate_graphs --name test-25 --min_args 25 --max_args 25 --num 1000
 python -m src.data.graphs2AFs --name test-25
 ```
-
-To see more information about the parameters use the `--help` parameter
+For more information about the parameters of these scripts use the `--help` parameter
 
 # Experiment
 
