@@ -22,12 +22,12 @@ Got to the `src/data/nauty` directory to install [pynauty](https://web.cs.dal.ca
 # Data
 To generate Argumentation Frameworks we use the [AFBenchGen2](https://sourceforge.net/projects/afbenchgen/), [AFGen](http://argumentationcompetition.org/2019/papers/ICCMA19_paper_3.pdf) and [probo](https://sourceforge.net/projects/probo/) generators (thanks to the original authors!)
 
-A dataset can be generated with `generate_graphs.py` (which generates .apx files) and `graphs2AFs.py` (which converts the .apx files to ArgumentationFramework objects with enumerated extensions). The generated files are stored in `data/dataset/[dataset_name]`. For instance, in order to generate a dataset named `test-ds` consisting of 1000 graphs each containing 25 arguments, execute these commands
+A dataset can be generated with `generate_graphs.py` (which generates .apx files) and `graphs2AFs.py` (which converts the .apx files to ArgumentationFramework objects with enumerated extensions). For instance, in order to generate a dataset named `test-ds` consisting of 1000 graphs each containing 25 arguments, execute these commands
 ```
 python -m src.data.generate_graphs --name test-25 --min_args 25 --max_args 25 --num 1000
 python -m src.data.graphs2AFs --name test-25
 ```
-For more information about the parameters of these scripts use the `--help` parameter
+The generated files are stored in `data/dataset/[name]`. For more information about the parameters of these scripts use the `--help` parameter
 
 # Experiment
 
@@ -43,7 +43,10 @@ with the parameters
 * `--test_ds` use the name given to the test set
 * `--task` choose a task from `['cred','scept','enum']`
 * `--semantics` choose a semantics from `['CO','ST','PR','GR']`
+* `--model` choose a GNN model from `['AGNN','FM2','GCN']
 * `--tag` name this experiment
 * `--help` to see more information about other parameters
+
+The trained model checkpoints are saved in `models/sl/[model]/[tag]/`
 
 To track the experiment I use [Weights and Biases](https://wandb.ai/)
