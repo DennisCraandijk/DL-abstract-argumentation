@@ -50,3 +50,22 @@ with the parameters
 The trained model checkpoints are saved in `models/sl/[model]/[tag]/`
 
 To track the experiment I use [Weights and Biases](https://wandb.ai/)
+
+# Cite
+
+```
+@inproceedings{ijcai2020-231,
+  title     = {Deep Learning for Abstract Argumentation Semantics},
+  author    = {Craandijk, Dennis and Bex, Floris},
+  booktitle = {Proceedings of the Twenty-Ninth International Joint Conference on
+               Artificial Intelligence, {IJCAI-20}},
+  publisher = {International Joint Conferences on Artificial Intelligence Organization},             
+  editor    = {Christian Bessiere},	
+  pages     = {1667--1673},
+  year      = {2020},
+  month     = {7},
+  note      = {Main track}
+  doi       = {10.24963/ijcai.2020/231},
+  url       = {https://doi.org/10.24963/ijcai.2020/231},
+}
+```
