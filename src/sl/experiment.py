@@ -337,7 +337,7 @@ class SLExperiment(pl.LightningModule):
         arg_parser.add_argument("--tag", type=str, default="debug")
 
         arg_parser.add_argument("--batch_size", type=int, default=50, help="Batch size")
-        arg_parser.add_argument("--lr", type=float, default=2e-4)
+        arg_parser.add_argument("--lr", type=float, default=1e-4)
         arg_parser.add_argument("--cyc_policy", type=bool, default=True)
         arg_parser.add_argument("--wd", type=float, default=10e-10)
 
