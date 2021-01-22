@@ -18,7 +18,7 @@ class GNN(nn.Module):
     def assign_readout_fns(self) -> dict:
         raise NotImplementedError
 
-    def forward(self, batch: Batch, output_all_steps=False):
+    def forward(self, batch: Batch, output_all_steps=True):
 
         edge_index = batch.edge_index
         sections = (
