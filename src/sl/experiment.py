@@ -352,7 +352,7 @@ class SLExperiment(pl.LightningModule):
 
 def cli_main():
 
-    parser = argparse.ArgumentParser(add_help=False)
+    parser = argparse.ArgumentParser()
 
     # trainer args
     parser = pl.Trainer.add_argparse_args(parser)
