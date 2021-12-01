@@ -9,4 +9,4 @@ class FM2(GCNConv):
 
     def forward(self, batch):
         x = torch.cat((batch.node_x_in.unsqueeze(dim=1), batch.node_x_out.unsqueeze(dim=1)), dim=1)
-        return super().forward(x, batch.edge_index, edge_weight=None)
+        return super().forward(x, batch.edge_index, edge_weight=None).squeeze().unsqueeze(0)
