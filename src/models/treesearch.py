@@ -15,10 +15,10 @@ def input2set(input):
 
 def set_features(data, features):
     # fill data with new feature
-    for node in range(len(data.node_embedding)):
-        data.node_embedding[node] = 0
+    for node in range(len(data.node_input)):
+        data.node_input[node] = 0
         if node in features:
-            data.node_embedding[node] = 1
+            data.node_input[node] = 1
 
     return data
 
