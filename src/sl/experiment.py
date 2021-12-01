@@ -50,9 +50,9 @@ class SLExperiment(pl.LightningModule):
         self.semantics = semantics
         self.task = task
         self.representation = model
-        if model is "GCN":
+        if model == "GCN":
             self.model = GCN()
-        elif model is "FM2":
+        elif model == "FM2":
             self.model = FM2()
         else:
             self.model = AGNN(hidden_dim, mp_steps=mp_steps)
