@@ -8,6 +8,4 @@ class GCN(GCNConv):
 
     def forward(self, batch, **kwargs):
         x = batch.node_x.unsqueeze(dim=1)
-        out = super().forward(x, batch.edge_index, edge_weight=None).squeeze()
-        outputs = {'node': [out]}
-        return outputs
+        return super().forward(x, batch.edge_index, edge_weight=None).squeeze().unsqueeze(0)
