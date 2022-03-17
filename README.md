@@ -15,9 +15,12 @@ Please email me for questions.
 Create a virtual python 3 environment (tested with 3.8) and install with pip or conda
 
 #### Pip
+First install
+
 * [pytorch](https://pytorch.org/) (tested with version 1.11)
 * [pytorch_geometric](https://github.com/rusty1s/pytorch_geometric) (tested with version 2.0.2)
-with the cuda/cpu settings for your system, then install the other requirements
+
+seperately with the cuda/cpu settings for your system, then install the other requirements with
 ```
 pip install -r requirements.txt
 ```
