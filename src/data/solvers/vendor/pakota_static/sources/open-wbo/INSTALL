@@ -1,0 +1,67 @@
+### INSTALL for the Open-WBO MaxSAT Solver
+
+Open-WBO is compiled like MiniSAT. 
+The option "s" statically compiles Open-WBO, and the option "r" compiles 
+Open-WBO in release mode. For example:
+
+# Compiles Open-WBO statically ("s") in release mode ("r")
+make rs
+
+# Compiles Open-WBO dynamically in debug mode
+make
+
+
+Any MiniSAT-like SAT solver may be used with Open-WBO. 
+If you want to use a new SAT solver (e.g. "MiniSAT2.0"), it is necessary to 
+crease a subdirectory (e.g. "minisat2.0") inside the "solvers" directory and 
+change the Makefile accordingly:
+
+# VERSION    = core or simp
+# SOLVERNAME = name of the SAT solver
+# SOLVERDIR  = subdirectory of the SAT solver
+# NSPACE     = namespace of the SAT solver
+#
+# e.g. minisat compilation with core version:
+#
+# VERSION    = core
+# SOLVERNAME = "Minisat"
+# SOLVERDIR  = minisat
+# NSPACE     = Minisat
+#
+VERSION    = core
+SOLVERNAME = "MiniSAT2.0"
+SOLVERDIR  = minisat2.0
+NSPACE     = MiniSAT
+# THE REMAINING OF THE MAKEFILE SHOULD BE LEFT UNCHANGED
+
+
+The following SAT solvers are included in this version of Open-WBO: 
+(i) minisat2.0, (ii) minisat2.2, (iii) glucose2.3, (iv) glucose3.0, (v) zenn, 
+(vi) sinn, (vii) glueminisat, (viii) gluh, (ix) glue_bit, (x) glucored.
+
+
+The above solvers can be quickly compiled by using the "compile.sh" script.
+
+c USAGE: ./compile.sh [sat solver] (options)
+c Options: debug, release (default: release)
+c SAT solvers: minisat2.0, minisat2.2, glucose2.3, glucose3.0, zenn, sinn, glueminisat, gluh, glue_bit, glucored
+
+For example, Glucose 3.0 can be compiled as follows.
+
+# Compiles Glucose 3.0 in release mode
+./compile.sh glucose3.0
+
+
+The above solvers can be quickly clean by using the "clean.sh" script.
+
+c USAGE: ./clean.sh [sat solver]
+c SAT solvers: minisat2.0, minisat2.2, glucose2.3, glucose3.0, zenn, sinn, glueminisat, gluh, glue_bit, glucored, all
+
+For example, Glucose 3.0 can be cleaned as follows.
+
+# Cleans Glucose 3.0
+./clean.sh glucose3.0
+
+
+Authors: Ruben Martins, Vasco Manquinho, Ines Lynce
+To contact the authors please send an email to:  open-wbo@sat.inesc-id.pt

@@ -1,0 +1,89 @@
+Pakota - solver for optimal extension and status enforcement in abstract argumentation
+--------------------------------------------------------------------------------------
+Version 2017-05-31
+
+To compile the program:
+
+cd sources
+make all
+
+
+To remove all object files:
+
+cd sources
+make clean
+
+
+USAGE: ./pakota [file] [mode] [sem] [options]
+
+COMMAND LINE ARGUMENTS:
+
+file : Input filename for enforcement instance in apx format.
+mode : Enforcement variant. mode={strict|non-strict|cred|skept}
+    strict     : strict extension enforcement
+    non-strict : non-strict extension enforcement
+    cred       : credulous status enforcement
+    skept      : skeptical status enforcement
+sem  : Argumentation semantics. sem={adm|com|stb|prf}
+    adm        : admissible
+    com        : complete
+    stb        : stable
+    prf        : preferred
+    sem        : semi-stable
+    stg        : stage
+
+COMMAND LINE OPTIONS:
+
+-h      : Display this help message.
+-v      : Display the version of the program.
+-o out  : Output clauses to file out and exit.
+-t type : Output clauses in format type={wcnf|lp} (default: wcnf).
+
+
+For an example input file for extension enforcement, see example.apx.
+Likewise for status enforcement, see status-example.apx.
+
+
+Notes:
+
+* Open-WBO, the MaxSAT solver underlying the CEGAR approach implemented
+in pakota for the problem variants beyond NP, is available here: 
+http://sat.inesc-id.pt/open-wbo/
+
+* Currently, strict and non-strict extension enforcement [1] under admissible,
+complete, stable, preferred, semi-stable and stage semantics is supported.
+
+* Credulous and skeptical status enforcement [2] for admissible and stable
+semantics has been implemented.
+
+* For the NP problem variants, pakota can output declarative encodings in 
+both wcnf (MaxSAT) and lp (ILP) formats, for use with corresponding solvers.
+
+* In the current implementation, optimization solvers are used 
+non-incrementally.
+
+* The code for Open-WBO has slightly been modified: 
+in algorithms/Alg_MSU3.cc some parts have been commented out and replaced 
+by breaks. This is to ensure that Open-WBO doesn't kill the enforcement 
+process while exiting or print to standard output.
+
+Please direct any questions, comments, bug reports etc. to
+andreas.niskanen@helsinki.fi
+
+Please use the following references for pakota:
+
+[1] Complexity Results and Algorithms for Extension Enforcement in Abstract Argumentation.
+Johannes P. Wallner, Andreas Niskanen, and Matti Järvisalo.
+In Dale Schuurmans and Michael Wellman, editors,
+Proceedings of the 30th AAAI Conference on Artificial Intelligence (AAAI 2016), pages 1088-1094. AAAI Press, 2016.
+
+[2] Optimal Status Enforcement in Abstract Argumentation.
+Andreas Niskanen, Johannes P. Wallner, and Matti Järvisalo.
+In Subbarao Kambhampati, editor,
+Proceedings of the 25th International Joint Conference on Artificial Intelligence (IJCAI 2016), pages 1216-1222. AAAI Press, 2016.
+
+[3] Pakota: A System for Enforcement in Abstract Argumentation.
+Andreas Niskanen, Johannes P. Wallner, and Matti Järvisalo.
+In Loizos Michael and Antonis C. Kakas, editors,
+Proceedings of the 15th European Conference on Logics in Artificial Intelligence (JELIA 2016),
+volume 10021 of Lecture Notes in Computer Science, pages 385-400. Springer, 2016.

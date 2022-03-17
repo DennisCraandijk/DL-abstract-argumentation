@@ -1,0 +1,32 @@
+# Sample configuration file for probo
+# remember: indentation with spaces and not tabs (cf. yaml.org)
+
+solvers:
+  - solvers/tweetysolver-v1.0.9.sh
+  - solvers/tweetysolver-v1.1.1.sh
+
+problems:
+  - EE-PR
+  - SE-PR
+  - DS-PR
+  - DC-PR  
+
+filesTgf:
+  - examples/ex1.tgf
+  - examples/ex2.tgf
+  - examples/ex3.tgf
+
+filesApx:
+  - examples/ex1.apx
+  - examples/ex2.apx
+  - examples/ex3.apx
+
+DC_NUMBEROFARGUMENTS: 10
+
+DS_NUMBEROFARGUMENTS: 10
+
+DE_NUMBEROFEXTENSIONS: 10
+
+DL_NUMBEROFLABELINGS: 10
+
+TIMEOUT: 1800

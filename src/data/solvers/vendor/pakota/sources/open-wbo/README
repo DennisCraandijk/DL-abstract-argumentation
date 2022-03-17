@@ -1,0 +1,56 @@
+### README for the Open-WBO MaxSAT Solver
+### Version 1.3.0 -- 1 January 2015
+
+Open-WBO is an extensible and modular open-source MaxSAT Solver.
+Open-WBO was the best non-portfolio solver in the unweighted and partial 
+industrial categories at the MaxSAT Evaluation 2014.
+
+Usage of the solver:
+./open-wbo [options] <input-file>
+
+The following options are available in Open-WBO:
+
+### Global Options
+#
+# Verbosity level (0=minimal, 1=more)
+-verbosity    = <int32>  [   0 ..    1] (default: 1)
+
+# Limit on memory usage in megabytes
+-mem-lim      = <int32>  [   0 .. imax] (default: 2147483647)
+
+# Limit on CPU time allowed in seconds
+-cpu-lim      = <int32>  [   0 .. imax] (default: 2147483647)
+
+# Search algorithm (0=wbo, 1=linear-su, 2=linear-us, 3=msu3, 4=wmsu3, 5=best)
+-algorithm    = <int32>  [   0 ..    1] (default: 5)
+
+# BMO search 
+-bmo,-no-bmo (default on)
+
+# Incremental strategy (0=none, 1=blocking, 2=weakening, 3=iterative)
+-incremental  = <int32>  [   0 ..    3] (default: 3)
+
+# Pseudo-Boolean encodings (0=SWC)
+-pb           = <int32>  [   0 ..    0] (default: 0)
+
+# At-most-one encodings (0=ladder)
+-amo          = <int32>  [   0 ..    0] (default: 0)
+
+# Cardinality encodings (0=cardinality networks, 1=totalizer, 2=modulo totalizer)
+-cardinality  = <int32>  [   0 ..    2] (default: 1)
+
+       
+### WBO Options (algorithm=0, unsatisfiability-based algorithm)
+#
+# Weight strategy (0=none, 1=weight-based, 2=diversity-based)
+-weight-strategy = <int32>  [   0 ..    2] (default: 2)
+
+# Symmetry breaking
+-symmetry, -no-symmetry (default on)
+
+# Limit on the number of symmetry breaking clauses
+-symmetry-limit = <int32>  [   0 .. imax] (default: 500000)
+
+
+Authors: Ruben Martins, Vasco Manquinho, Ines Lynce
+To contact the authors please send an email to:  open-wbo@sat.inesc-id.pt

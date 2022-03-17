@@ -1,0 +1,630 @@
+diff -rupN minisat/core/Main.cc minisatD/core/Main.cc
+--- minisat/core/Main.cc	2010-07-10 11:07:36.000000000 -0500
++++ minisatD/core/Main.cc	2013-04-17 14:22:09.412472000 -0500
+@@ -18,6 +18,14 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN A
+ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ **************************************************************************************************/
+ 
++/**************************************************************************************************
++This is a patched version of Minisat 2.2. [Marijn Heule, April 17, 2013]
++
++The patch includes:
++- The output of the solver is modified following to the SAT Competition 2013 output requirements
++- The solver optionally emits a DRUP proof in the file speficied in argv[2]
++**************************************************************************************************/
++
+ #include <errno.h>
+ 
+ #include <signal.h>
+@@ -38,13 +46,13 @@ void printStats(Solver& solver)
+ {
+     double cpu_time = cpuTime();
+     double mem_used = memUsedPeak();
+-    printf("restarts              : %"PRIu64"\n", solver.starts);
+-    printf("conflicts             : %-12"PRIu64"   (%.0f /sec)\n", solver.conflicts   , solver.conflicts   /cpu_time);
+-    printf("decisions             : %-12"PRIu64"   (%4.2f %% random) (%.0f /sec)\n", solver.decisions, (float)solver.rnd_decisions*100 / (float)solver.decisions, solver.decisions   /cpu_time);
+-    printf("propagations          : %-12"PRIu64"   (%.0f /sec)\n", solver.propagations, solver.propagations/cpu_time);
+-    printf("conflict literals     : %-12"PRIu64"   (%4.2f %% deleted)\n", solver.tot_literals, (solver.max_literals - solver.tot_literals)*100 / (double)solver.max_literals);
+-    if (mem_used != 0) printf("Memory used           : %.2f MB\n", mem_used);
+-    printf("CPU time              : %g s\n", cpu_time);
++    printf("c restarts              : %"PRIu64"\n", solver.starts);
++    printf("c conflicts             : %-12"PRIu64"   (%.0f /sec)\n", solver.conflicts   , solver.conflicts   /cpu_time);
++    printf("c decisions             : %-12"PRIu64"   (%4.2f %% random) (%.0f /sec)\n", solver.decisions, (float)solver.rnd_decisions*100 / (float)solver.decisions, solver.decisions   /cpu_time);
++    printf("c propagations          : %-12"PRIu64"   (%.0f /sec)\n", solver.propagations, solver.propagations/cpu_time);
++    printf("c conflict literals     : %-12"PRIu64"   (%4.2f %% deleted)\n", solver.tot_literals, (solver.max_literals - solver.tot_literals)*100 / (double)solver.max_literals);
++    if (mem_used != 0) printf("c Memory used           : %.2f MB\n", mem_used);
++    printf("c CPU time              : %g s\n", cpu_time);
+ }
+ 
+ 
+@@ -77,7 +85,7 @@ int main(int argc, char** argv)
+ #if defined(__linux__)
+         fpu_control_t oldcw, newcw;
+         _FPU_GETCW(oldcw); newcw = (oldcw & ~_FPU_EXTENDED) | _FPU_DOUBLE; _FPU_SETCW(newcw);
+-        printf("WARNING: for repeatability, setting FPU to use double precision\n");
++        printf("c WARNING: for repeatability, setting FPU to use double precision\n");
+ #endif
+         // Extra options:
+         //
+@@ -105,7 +113,7 @@ int main(int argc, char** argv)
+             if (rl.rlim_max == RLIM_INFINITY || (rlim_t)cpu_lim < rl.rlim_max){
+                 rl.rlim_cur = cpu_lim;
+                 if (setrlimit(RLIMIT_CPU, &rl) == -1)
+-                    printf("WARNING! Could not set resource limit: CPU-time.\n");
++                    printf("c WARNING! Could not set resource limit: CPU-time.\n");
+             } }
+ 
+         // Set limit on virtual memory:
+@@ -116,32 +124,32 @@ int main(int argc, char** argv)
+             if (rl.rlim_max == RLIM_INFINITY || new_mem_lim < rl.rlim_max){
+                 rl.rlim_cur = new_mem_lim;
+                 if (setrlimit(RLIMIT_AS, &rl) == -1)
+-                    printf("WARNING! Could not set resource limit: Virtual memory.\n");
++                    printf("c WARNING! Could not set resource limit: Virtual memory.\n");
+             } }
+         
+         if (argc == 1)
+-            printf("Reading from standard input... Use '--help' for help.\n");
++            printf("c Reading from standard input... Use '--help' for help.\n");
+         
+         gzFile in = (argc == 1) ? gzdopen(0, "rb") : gzopen(argv[1], "rb");
+         if (in == NULL)
+             printf("ERROR! Could not open file: %s\n", argc == 1 ? "<stdin>" : argv[1]), exit(1);
+         
+         if (S.verbosity > 0){
+-            printf("============================[ Problem Statistics ]=============================\n");
+-            printf("|                                                                             |\n"); }
++            printf("c ============================[ Problem Statistics ]=============================\n");
++            printf("c |                                                                             |\n"); }
+         
++        S.output = (argc >= 3) ? fopen(argv[2], "wb") : NULL;
+         parse_DIMACS(in, S);
+         gzclose(in);
+-        FILE* res = (argc >= 3) ? fopen(argv[2], "wb") : NULL;
+         
+         if (S.verbosity > 0){
+-            printf("|  Number of variables:  %12d                                         |\n", S.nVars());
+-            printf("|  Number of clauses:    %12d                                         |\n", S.nClauses()); }
++            printf("c |  Number of variables:  %12d                                         |\n", S.nVars());
++            printf("c |  Number of clauses:    %12d                                         |\n", S.nClauses()); }
+         
+         double parsed_time = cpuTime();
+         if (S.verbosity > 0){
+-            printf("|  Parse time:           %12.2f s                                       |\n", parsed_time - initial_time);
+-            printf("|                                                                             |\n"); }
++            printf("c |  Parse time:           %12.2f s                                       |\n", parsed_time - initial_time);
++            printf("c |                                                                             |\n"); }
+  
+         // Change to signal-handlers that will only notify the solver and allow it to terminate
+         // voluntarily:
+@@ -149,13 +157,13 @@ int main(int argc, char** argv)
+         signal(SIGXCPU,SIGINT_interrupt);
+        
+         if (!S.simplify()){
+-            if (res != NULL) fprintf(res, "UNSAT\n"), fclose(res);
++            if (S.output != NULL) fprintf(S.output, "0\n"), fclose(S.output);
+             if (S.verbosity > 0){
+-                printf("===============================================================================\n");
+-                printf("Solved by unit propagation\n");
++                printf("c ===============================================================================\n");
++                printf("c Solved by unit propagation\n");
+                 printStats(S);
+-                printf("\n"); }
+-            printf("UNSATISFIABLE\n");
++                printf("c \n"); }
++            printf("s UNSATISFIABLE\n");
+             exit(20);
+         }
+         
+@@ -163,20 +171,19 @@ int main(int argc, char** argv)
+         lbool ret = S.solveLimited(dummy);
+         if (S.verbosity > 0){
+             printStats(S);
+-            printf("\n"); }
+-        printf(ret == l_True ? "SATISFIABLE\n" : ret == l_False ? "UNSATISFIABLE\n" : "INDETERMINATE\n");
+-        if (res != NULL){
+-            if (ret == l_True){
+-                fprintf(res, "SAT\n");
+-                for (int i = 0; i < S.nVars(); i++)
+-                    if (S.model[i] != l_Undef)
+-                        fprintf(res, "%s%s%d", (i==0)?"":" ", (S.model[i]==l_True)?"":"-", i+1);
+-                fprintf(res, " 0\n");
+-            }else if (ret == l_False)
+-                fprintf(res, "UNSAT\n");
+-            else
+-                fprintf(res, "INDET\n");
+-            fclose(res);
++            printf("c \n"); }
++        printf(ret == l_True ? "s SATISFIABLE\n" : ret == l_False ? "s UNSATISFIABLE\n" : "s UNKNOWN\n");
++        if (S.output != NULL){
++            if (ret == l_False)
++                fprintf(S.output, "0\n");
++            fclose(S.output);
++        }
++        if (ret == l_True){
++            printf("v ");
++            for (int i = 0; i < S.nVars(); i++)
++                if (S.model[i] != l_Undef)
++                    printf("%s%s%d", (i==0)?"":" ", (S.model[i]==l_True)?"":"-", i+1);
++            printf(" 0\n");
+         }
+         
+ #ifdef NDEBUG
+@@ -185,8 +192,8 @@ int main(int argc, char** argv)
+         return (ret == l_True ? 10 : ret == l_False ? 20 : 0);
+ #endif
+     } catch (OutOfMemoryException&){
+-        printf("===============================================================================\n");
+-        printf("INDETERMINATE\n");
++        printf("c ===============================================================================\n");
++        printf("s UNKNOWN\n");
+         exit(0);
+     }
+ }
+diff -rupN minisat/core/Solver.cc minisatD/core/Solver.cc
+--- minisat/core/Solver.cc	2010-07-10 11:07:36.000000000 -0500
++++ minisatD/core/Solver.cc	2013-04-17 14:22:22.371565000 -0500
+@@ -18,6 +18,14 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN A
+ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ **************************************************************************************************/
+ 
++/**************************************************************************************************
++This is a patched version of Minisat 2.2. [Marijn Heule, April 17, 2013]
++
++The patch includes:
++- The output of the solver is modified following to the SAT Competition 2013 output requirements
++- The solver optionally emits a DRUP proof in the file speficied in argv[2]
++**************************************************************************************************/
++
+ #include <math.h>
+ 
+ #include "mtl/Sort.h"
+@@ -136,7 +144,17 @@ bool Solver::addClause_(vec<Lit>& ps)
+ 
+     // Check if clause is satisfied and remove false/duplicate literals:
+     sort(ps);
+-    Lit p; int i, j;
++
++    vec<Lit>    oc;
++    oc.clear();
++
++    Lit p; int i, j, flag = 0;
++    for (i = j = 0, p = lit_Undef; i < ps.size(); i++) {
++        oc.push(ps[i]);
++        if (value(ps[i]) == l_True || ps[i] == ~p || value(ps[i]) == l_False)
++          flag = 1;
++    }
++
+     for (i = j = 0, p = lit_Undef; i < ps.size(); i++)
+         if (value(ps[i]) == l_True || ps[i] == ~p)
+             return true;
+@@ -144,6 +162,17 @@ bool Solver::addClause_(vec<Lit>& ps)
+             ps[j++] = p = ps[i];
+     ps.shrink(i - j);
+ 
++    if (flag && (output != NULL)) {
++      for (i = j = 0, p = lit_Undef; i < ps.size(); i++)
++        fprintf(output, "%i ", (var(ps[i]) + 1) * (-2 * sign(ps[i]) + 1));
++      fprintf(output, "0\n");
++
++      fprintf(output, "d ");
++      for (i = j = 0, p = lit_Undef; i < oc.size(); i++)
++        fprintf(output, "%i ", (var(oc[i]) + 1) * (-2 * sign(oc[i]) + 1));
++      fprintf(output, "0\n");
++    }
++
+     if (ps.size() == 0)
+         return ok = false;
+     else if (ps.size() == 1){
+@@ -187,6 +216,14 @@ void Solver::detachClause(CRef cr, bool 
+ 
+ void Solver::removeClause(CRef cr) {
+     Clause& c = ca[cr];
++
++    if (output != NULL) {
++      fprintf(output, "d ");
++      for (int i = 0; i < c.size(); i++)
++        fprintf(output, "%i ", (var(c[i]) + 1) * (-2 * sign(c[i]) + 1));
++      fprintf(output, "0\n");
++    }
++
+     detachClause(cr);
+     // Don't leave pointers to free'd memory!
+     if (locked(c)) vardata[var(c[0])].reason = CRef_Undef;
+@@ -639,6 +676,12 @@ lbool Solver::search(int nof_conflicts)
+                 claBumpActivity(ca[cr]);
+                 uncheckedEnqueue(learnt_clause[0], cr);
+             }
++            if (output != NULL) {
++              for (int i = 0; i < learnt_clause.size(); i++)
++                fprintf(output, "%i " , (var(learnt_clause[i]) + 1) *
++                                  (-2 * sign(learnt_clause[i]) + 1) );
++              fprintf(output, "0\n");
++            }
+ 
+             varDecayActivity();
+             claDecayActivity();
+@@ -649,7 +692,7 @@ lbool Solver::search(int nof_conflicts)
+                 max_learnts             *= learntsize_inc;
+ 
+                 if (verbosity >= 1)
+-                    printf("| %9d | %7d %8d %8d | %8d %8d %6.0f | %6.3f %% |\n", 
++                    printf("c | %9d | %7d %8d %8d | %8d %8d %6.0f | %6.3f %% |\n", 
+                            (int)conflicts, 
+                            (int)dec_vars - (trail_lim.size() == 0 ? trail.size() : trail_lim[0]), nClauses(), (int)clauses_literals, 
+                            (int)max_learnts, nLearnts(), (double)learnts_literals/nLearnts(), progressEstimate()*100);
+@@ -762,10 +805,10 @@ lbool Solver::solve_()
+     lbool   status            = l_Undef;
+ 
+     if (verbosity >= 1){
+-        printf("============================[ Search Statistics ]==============================\n");
+-        printf("| Conflicts |          ORIGINAL         |          LEARNT          | Progress |\n");
+-        printf("|           |    Vars  Clauses Literals |    Limit  Clauses Lit/Cl |          |\n");
+-        printf("===============================================================================\n");
++        printf("c ============================[ Search Statistics ]==============================\n");
++        printf("c | Conflicts |          ORIGINAL         |          LEARNT          | Progress |\n");
++        printf("c |           |    Vars  Clauses Literals |    Limit  Clauses Lit/Cl |          |\n");
++        printf("c ===============================================================================\n");
+     }
+ 
+     // Search:
+@@ -778,7 +821,7 @@ lbool Solver::solve_()
+     }
+ 
+     if (verbosity >= 1)
+-        printf("===============================================================================\n");
++        printf("c ===============================================================================\n");
+ 
+ 
+     if (status == l_True){
+@@ -917,7 +960,7 @@ void Solver::garbageCollect()
+ 
+     relocAll(to);
+     if (verbosity >= 2)
+-        printf("|  Garbage collection:   %12d bytes => %12d bytes             |\n", 
++        printf("c |  Garbage collection:   %12d bytes => %12d bytes             |\n", 
+                ca.size()*ClauseAllocator::Unit_Size, to.size()*ClauseAllocator::Unit_Size);
+     to.moveTo(ca);
+ }
+diff -rupN minisat/core/Solver.h minisatD/core/Solver.h
+--- minisat/core/Solver.h	2010-07-10 11:07:36.000000000 -0500
++++ minisatD/core/Solver.h	2013-03-29 17:06:17.871735000 -0500
+@@ -105,6 +105,9 @@ public:
+     void    checkGarbage(double gf);
+     void    checkGarbage();
+ 
++
++    FILE*               output;
++
+     // Extra results: (read-only member variable)
+     //
+     vec<lbool> model;             // If problem is satisfiable, this vector contains the model (if any).
+diff -rupN minisat/simp/Main.cc minisatD/simp/Main.cc
+--- minisat/simp/Main.cc	2010-07-10 11:07:36.000000000 -0500
++++ minisatD/simp/Main.cc	2013-04-17 14:21:19.928200000 -0500
+@@ -18,6 +18,14 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN A
+ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ **************************************************************************************************/
+ 
++/**************************************************************************************************
++This is a patched version of Minisat 2.2. [Marijn Heule, April 17, 2013]
++
++The patch includes:
++- The output of the solver is modified following to the SAT Competition 2013 output requirements
++- The solver optionally emits a DRUP proof in the file speficied in argv[2]
++**************************************************************************************************/
++
+ #include <errno.h>
+ 
+ #include <signal.h>
+@@ -39,13 +47,13 @@ void printStats(Solver& solver)
+ {
+     double cpu_time = cpuTime();
+     double mem_used = memUsedPeak();
+-    printf("restarts              : %"PRIu64"\n", solver.starts);
+-    printf("conflicts             : %-12"PRIu64"   (%.0f /sec)\n", solver.conflicts   , solver.conflicts   /cpu_time);
+-    printf("decisions             : %-12"PRIu64"   (%4.2f %% random) (%.0f /sec)\n", solver.decisions, (float)solver.rnd_decisions*100 / (float)solver.decisions, solver.decisions   /cpu_time);
+-    printf("propagations          : %-12"PRIu64"   (%.0f /sec)\n", solver.propagations, solver.propagations/cpu_time);
+-    printf("conflict literals     : %-12"PRIu64"   (%4.2f %% deleted)\n", solver.tot_literals, (solver.max_literals - solver.tot_literals)*100 / (double)solver.max_literals);
+-    if (mem_used != 0) printf("Memory used           : %.2f MB\n", mem_used);
+-    printf("CPU time              : %g s\n", cpu_time);
++    printf("c restarts              : %"PRIu64"\n", solver.starts);
++    printf("c conflicts             : %-12"PRIu64"   (%.0f /sec)\n", solver.conflicts   , solver.conflicts   /cpu_time);
++    printf("c decisions             : %-12"PRIu64"   (%4.2f %% random) (%.0f /sec)\n", solver.decisions, (float)solver.rnd_decisions*100 / (float)solver.decisions, solver.decisions   /cpu_time);
++    printf("c propagations          : %-12"PRIu64"   (%.0f /sec)\n", solver.propagations, solver.propagations/cpu_time);
++    printf("c conflict literals     : %-12"PRIu64"   (%4.2f %% deleted)\n", solver.tot_literals, (solver.max_literals - solver.tot_literals)*100 / (double)solver.max_literals);
++    if (mem_used != 0) printf("c Memory used           : %.2f MB\n", mem_used);
++    printf("c CPU time              : %g s\n", cpu_time);
+ }
+ 
+ 
+@@ -77,7 +85,7 @@ int main(int argc, char** argv)
+ #if defined(__linux__)
+         fpu_control_t oldcw, newcw;
+         _FPU_GETCW(oldcw); newcw = (oldcw & ~_FPU_EXTENDED) | _FPU_DOUBLE; _FPU_SETCW(newcw);
+-        printf("WARNING: for repeatability, setting FPU to use double precision\n");
++        printf("c WARNING: for repeatability, setting FPU to use double precision\n");
+ #endif
+         // Extra options:
+         //
+@@ -92,6 +100,7 @@ int main(int argc, char** argv)
+         SimpSolver  S;
+         double      initial_time = cpuTime();
+ 
++        S.parsing = 1;
+         if (!pre) S.eliminate(true);
+ 
+         S.verbosity = verb;
+@@ -109,7 +118,7 @@ int main(int argc, char** argv)
+             if (rl.rlim_max == RLIM_INFINITY || (rlim_t)cpu_lim < rl.rlim_max){
+                 rl.rlim_cur = cpu_lim;
+                 if (setrlimit(RLIMIT_CPU, &rl) == -1)
+-                    printf("WARNING! Could not set resource limit: CPU-time.\n");
++                    printf("c WARNING! Could not set resource limit: CPU-time.\n");
+             } }
+ 
+         // Set limit on virtual memory:
+@@ -120,57 +129,58 @@ int main(int argc, char** argv)
+             if (rl.rlim_max == RLIM_INFINITY || new_mem_lim < rl.rlim_max){
+                 rl.rlim_cur = new_mem_lim;
+                 if (setrlimit(RLIMIT_AS, &rl) == -1)
+-                    printf("WARNING! Could not set resource limit: Virtual memory.\n");
++                    printf("c WARNING! Could not set resource limit: Virtual memory.\n");
+             } }
+         
+         if (argc == 1)
+-            printf("Reading from standard input... Use '--help' for help.\n");
++            printf("c Reading from standard input... Use '--help' for help.\n");
+ 
+         gzFile in = (argc == 1) ? gzdopen(0, "rb") : gzopen(argv[1], "rb");
+         if (in == NULL)
+             printf("ERROR! Could not open file: %s\n", argc == 1 ? "<stdin>" : argv[1]), exit(1);
+         
+         if (S.verbosity > 0){
+-            printf("============================[ Problem Statistics ]=============================\n");
+-            printf("|                                                                             |\n"); }
++            printf("c ============================[ Problem Statistics ]=============================\n");
++            printf("c |                                                                             |\n"); }
+         
++        S.output = (argc >= 3) ? fopen(argv[2], "wb") : NULL;
+         parse_DIMACS(in, S);
+         gzclose(in);
+-        FILE* res = (argc >= 3) ? fopen(argv[2], "wb") : NULL;
+ 
+         if (S.verbosity > 0){
+-            printf("|  Number of variables:  %12d                                         |\n", S.nVars());
+-            printf("|  Number of clauses:    %12d                                         |\n", S.nClauses()); }
++            printf("c |  Number of variables:  %12d                                         |\n", S.nVars());
++            printf("c |  Number of clauses:    %12d                                         |\n", S.nClauses()); }
+         
+         double parsed_time = cpuTime();
+         if (S.verbosity > 0)
+-            printf("|  Parse time:           %12.2f s                                       |\n", parsed_time - initial_time);
++            printf("c |  Parse time:           %12.2f s                                       |\n", parsed_time - initial_time);
+ 
+         // Change to signal-handlers that will only notify the solver and allow it to terminate
+         // voluntarily:
+         signal(SIGINT, SIGINT_interrupt);
+         signal(SIGXCPU,SIGINT_interrupt);
+ 
++        S.parsing = 0;
+         S.eliminate(true);
+         double simplified_time = cpuTime();
+         if (S.verbosity > 0){
+-            printf("|  Simplification time:  %12.2f s                                       |\n", simplified_time - parsed_time);
+-            printf("|                                                                             |\n"); }
++            printf("c |  Simplification time:  %12.2f s                                       |\n", simplified_time - parsed_time);
++            printf("c |                                                                             |\n"); }
+ 
+         if (!S.okay()){
+-            if (res != NULL) fprintf(res, "UNSAT\n"), fclose(res);
++            if (S.output != NULL) fprintf(S.output, "0\n"), fclose(S.output);
+             if (S.verbosity > 0){
+-                printf("===============================================================================\n");
+-                printf("Solved by simplification\n");
++                printf("c ===============================================================================\n");
++                printf("c Solved by simplification\n");
+                 printStats(S);
+-                printf("\n"); }
+-            printf("UNSATISFIABLE\n");
++                printf("c \n"); }
++            printf("s UNSATISFIABLE\n");
+             exit(20);
+         }
+ 
+         if (dimacs){
+             if (S.verbosity > 0)
+-                printf("==============================[ Writing DIMACS ]===============================\n");
++                printf("c ==============================[ Writing DIMACS ]===============================\n");
+             S.toDimacs((const char*)dimacs);
+             if (S.verbosity > 0)
+                 printStats(S);
+@@ -182,20 +192,19 @@ int main(int argc, char** argv)
+         
+         if (S.verbosity > 0){
+             printStats(S);
+-            printf("\n"); }
+-        printf(ret == l_True ? "SATISFIABLE\n" : ret == l_False ? "UNSATISFIABLE\n" : "INDETERMINATE\n");
+-        if (res != NULL){
+-            if (ret == l_True){
+-                fprintf(res, "SAT\n");
+-                for (int i = 0; i < S.nVars(); i++)
+-                    if (S.model[i] != l_Undef)
+-                        fprintf(res, "%s%s%d", (i==0)?"":" ", (S.model[i]==l_True)?"":"-", i+1);
+-                fprintf(res, " 0\n");
+-            }else if (ret == l_False)
+-                fprintf(res, "UNSAT\n");
+-            else
+-                fprintf(res, "INDET\n");
+-            fclose(res);
++            printf("c \n"); }
++        printf(ret == l_True ? "s SATISFIABLE\n" : ret == l_False ? "s UNSATISFIABLE\n" : "s UNKNOWN\n");
++        if (S.output != NULL){
++            if (ret == l_False)
++                fprintf(S.output, "0\n");
++            fclose(S.output);
++        }
++        if (ret == l_True){
++            printf("v ");
++            for (int i = 0; i < S.nVars(); i++)
++                if (S.model[i] != l_Undef)
++                    printf("%s%s%d", (i==0)?"":" ", (S.model[i]==l_True)?"":"-", i+1);
++            printf(" 0\n");
+         }
+ 
+ #ifdef NDEBUG
+@@ -204,8 +213,8 @@ int main(int argc, char** argv)
+         return (ret == l_True ? 10 : ret == l_False ? 20 : 0);
+ #endif
+     } catch (OutOfMemoryException&){
+-        printf("===============================================================================\n");
+-        printf("INDETERMINATE\n");
++        printf("c ===============================================================================\n");
++        printf("s UNKNOWN\n");
+         exit(0);
+     }
+ }
+diff -rupN minisat/simp/SimpSolver.cc minisatD/simp/SimpSolver.cc
+--- minisat/simp/SimpSolver.cc	2010-07-10 11:07:36.000000000 -0500
++++ minisatD/simp/SimpSolver.cc	2013-04-17 14:21:49.570382000 -0500
+@@ -18,6 +18,14 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN A
+ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ **************************************************************************************************/
+ 
++/**************************************************************************************************
++This is a patched version of Minisat 2.2. [Marijn Heule, April 17, 2013]
++
++The patch includes:
++- The output of the solver is modified following to the SAT Competition 2013 output requirements
++- The solver optionally emits a DRUP proof in the file speficied in argv[2]
++**************************************************************************************************/
++
+ #include "mtl/Sort.h"
+ #include "simp/SimpSolver.h"
+ #include "utils/System.h"
+@@ -117,7 +125,7 @@ lbool SimpSolver::solve_(bool do_simp, b
+     if (result == l_True)
+         result = Solver::solve_();
+     else if (verbosity >= 1)
+-        printf("===============================================================================\n");
++        printf("c ===============================================================================\n");
+ 
+     if (result == l_True)
+         extendModel();
+@@ -147,6 +155,12 @@ bool SimpSolver::addClause_(vec<Lit>& ps
+     if (!Solver::addClause_(ps))
+         return false;
+ 
++    if(!parsing && output != NULL) {
++      for (int i = 0; i < ps.size(); i++)
++        fprintf(output, "%i " , (var(ps[i]) + 1) * (-2 * sign(ps[i]) + 1) );
++      fprintf(output, "0\n");
++    }
++
+     if (use_simplification && clauses.size() == nclauses + 1){
+         CRef          cr = clauses.last();
+         const Clause& c  = ca[cr];
+@@ -197,10 +211,23 @@ bool SimpSolver::strengthenClause(CRef c
+     // if (!find(subsumption_queue, &c))
+     subsumption_queue.insert(cr);
+ 
++    if (output != NULL) {
++      for (int i = 0; i < c.size(); i++)
++        if (c[i] != l) fprintf(output, "%i " , (var(c[i]) + 1) * (-2 * sign(c[i]) + 1) );
++      fprintf(output, "0\n");
++    }
++
+     if (c.size() == 2){
+         removeClause(cr);
+         c.strengthen(l);
+     }else{
++        if (output != NULL) {
++          fprintf(output, "d ");
++          for (int i = 0; i < c.size(); i++)
++            fprintf(output, "%i " , (var(c[i]) + 1) * (-2 * sign(c[i]) + 1) );
++          fprintf(output, "0\n");
++        }
++
+         detachClause(cr, true);
+         c.strengthen(l);
+         attachClause(cr);
+@@ -351,7 +378,7 @@ bool SimpSolver::backwardSubsumptionChec
+         if (c.mark()) continue;
+ 
+         if (verbose && verbosity >= 2 && cnt++ % 1000 == 0)
+-            printf("subsumption left: %10d (%10d subsumed, %10d deleted literals)\r", subsumption_queue.size(), subsumed, deleted_literals);
++            printf("c subsumption left: %10d (%10d subsumed, %10d deleted literals)\r", subsumption_queue.size(), subsumed, deleted_literals);
+ 
+         assert(c.size() > 1 || value(c[0]) == l_True);    // Unit-clauses should have been propagated before this point.
+ 
+@@ -507,9 +534,6 @@ bool SimpSolver::eliminateVar(Var v)
+         mkElimClause(elimclauses, ~mkLit(v));
+     }
+ 
+-    for (int i = 0; i < cls.size(); i++)
+-        removeClause(cls[i]); 
+-
+     // Produce clauses in cross product:
+     vec<Lit>& resolvent = add_tmp;
+     for (int i = 0; i < pos.size(); i++)
+@@ -517,6 +541,9 @@ bool SimpSolver::eliminateVar(Var v)
+             if (merge(ca[pos[i]], ca[neg[j]], v, resolvent) && !addClause_(resolvent))
+                 return false;
+ 
++    for (int i = 0; i < cls.size(); i++)
++        removeClause(cls[i]);
++
+     // Free occurs list for this variable:
+     occurs[v].clear(true);
+     
+@@ -550,10 +577,10 @@ bool SimpSolver::substitute(Var v, Lit x
+             subst_clause.push(var(p) == v ? x ^ sign(p) : p);
+         }
+ 
+-        removeClause(cls[i]);
+-
+         if (!addClause_(subst_clause))
+             return ok = false;
++
++        removeClause(cls[i]);
+     }
+ 
+     return true;
+@@ -611,7 +638,7 @@ bool SimpSolver::eliminate(bool turn_off
+             if (isEliminated(elim) || value(elim) != l_Undef) continue;
+ 
+             if (verbosity >= 2 && cnt % 100 == 0)
+-                printf("elimination left: %10d\r", elim_heap.size());
++                printf("c elimination left: %10d\r", elim_heap.size());
+ 
+             if (use_asymm){
+                 // Temporarily freeze variable. Otherwise, it would immediately end up on the queue again:
+@@ -655,7 +682,7 @@ bool SimpSolver::eliminate(bool turn_off
+     }
+ 
+     if (verbosity >= 1 && elimclauses.size() > 0)
+-        printf("|  Eliminated clauses:     %10.2f Mb                                      |\n", 
++        printf("c |  Eliminated clauses:     %10.2f Mb                                      |\n", 
+                double(elimclauses.size() * sizeof(uint32_t)) / (1024*1024));
+ 
+     return ok;
+@@ -711,7 +738,7 @@ void SimpSolver::garbageCollect()
+     relocAll(to);
+     Solver::relocAll(to);
+     if (verbosity >= 2)
+-        printf("|  Garbage collection:   %12d bytes => %12d bytes             |\n", 
++        printf("c |  Garbage collection:   %12d bytes => %12d bytes             |\n", 
+                ca.size()*ClauseAllocator::Unit_Size, to.size()*ClauseAllocator::Unit_Size);
+     to.moveTo(ca);
+ }
+diff -rupN minisat/simp/SimpSolver.h minisatD/simp/SimpSolver.h
+--- minisat/simp/SimpSolver.h	2010-07-10 11:07:36.000000000 -0500
++++ minisatD/simp/SimpSolver.h	2013-03-29 17:06:17.899728000 -0500
+@@ -80,6 +80,7 @@ class SimpSolver : public Solver {
+ 
+     // Mode of operation:
+     //
++    int     parsing;
+     int     grow;              // Allow a variable elimination step to grow by a number of clauses (default to zero).
+     int     clause_lim;        // Variables are not eliminated if it produces a resolvent with a length above this limit.
+                                // -1 means no limit.

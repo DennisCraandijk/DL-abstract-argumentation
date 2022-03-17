@@ -1,0 +1,15 @@
+torch
+tqdm
+torch-geometric
+networkx
+numpy
+pytorch-lightning
+lightning-bolts
+wandb
+gym
+pynauty
+pandas
+torchmetrics
+psutil
+pytest
+python-sat

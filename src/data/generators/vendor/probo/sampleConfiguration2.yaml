@@ -1,0 +1,53 @@
+# Sample configuration file for probo2
+# ======================================================================
+# ======================================================================
+# solvers to be evaluated
+SOLVERS:
+  - solvers/tweetysolver-v1.0.9.sh
+  - solvers/tweetysolver-v1.1.1.sh
+# ======================================================================
+# all problems that are considered; only those solvers from above are
+# evaluated wrt. the following problems that actually support them
+PROBLEMS:
+  - EE-PR
+  - EE-CO
+  - DS-CO
+  - DC-GR  
+# ======================================================================
+# list of folders where probo2 looks for tgf files (recursively); every
+# tgf file should have a corresponding apx file with the same name
+FILES_TGF:
+  - examples/
+# ======================================================================
+# list of folders where probo2 looks for apx files (recursively); every
+# apx file should have a corresponding tgf file with the same name
+FILES_APX:
+  - examples/
+# ======================================================================
+# the name of the file where the log of the benchmark run is saved
+# (the log contains all executed calls, the output of each call, and the
+# measured runtime) (default: log_<current_time>.txt)
+# OUTPUT: log.txt
+# ======================================================================
+# For the problem DC the number of randomly selected arguments each
+# solver is queried for (default: 10)
+DC_NUMBEROFARGUMENTS: 10
+# ======================================================================
+# For the problem DS the number of randomly selected arguments each
+# solver is queried for  (default: 10)
+DS_NUMBEROFARGUMENTS: 10
+# ======================================================================
+# The timeout for each solver call (in seconds)  (default: 600)
+TIMEOUT: 5
+# ======================================================================
+# The number of repetitions of each solver call; the final solving time
+# for each call is the average over all calls, timeouts are ignored
+# (default: 1)
+REPETITIONS: 1
+# ======================================================================
+# Processes that might linger when a solver is timed out and should be
+# killed after each timeout
+KILLPROCESSES:
+  - clingo
+  - minisat
+# ========================================================== END OF FILE

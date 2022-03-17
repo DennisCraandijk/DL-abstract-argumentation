@@ -1,0 +1,19 @@
+name: ijcai_mil_scale_scept_2
+program: -msrc.train.train
+method: grid
+parameters:
+  evaluate:
+    value: True
+  steps:
+    values: [ 2,4,8,16,32,64,128,256,512,1024 ]
+  test_ds:
+    values: [ 'test-25','test-50', 'test-75','test-100','test-125' ]
+  seed:
+    value: 1
+  semantics:
+    values: [ 'com','prf','stb' ]
+  task:
+    value: 'cred'
+  representation:
+    value: 'AF'
+

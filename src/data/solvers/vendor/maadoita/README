@@ -1,0 +1,47 @@
+Maadoita - solver for grounded enforcement in abstract argumentation
+--------------------------------------------------------------------
+Version 2018-11-01
+
+To compile the program:
+
+cd sources
+make all
+
+To remove all object files:
+
+cd sources
+make clean
+
+USAGE: ./maadoita [file] [mode] [options]
+
+COMMAND LINE ARGUMENTS:
+
+file : Input filename for enforcement instance in apx format.
+mode : Enforcement variant. mode={strict|non-strict}
+    strict     : strict extension enforcement
+    non-strict : non-strict extension enforcement
+
+COMMAND LINE OPTIONS:
+
+-h      : Display this help message.
+-v      : Display the version of the program.
+-c      : Use CEGAR instead of direct MaxSAT encoding.
+-s      : Output clauses to stdout and exit.
+-o out  : Output clauses to file out and exit.
+-t type : Output clauses in format type={wcnf|lp} (default: wcnf).
+
+Open-WBO, the MaxSAT solver underlying the CEGAR approach implemented
+is included in this package and also available here: 
+http://sat.inesc-id.pt/open-wbo/
+
+Please direct any questions, comments, bug reports etc. to
+andreas.niskanen@helsinki.fi
+
+Please use the following reference for maadoita:
+
+[1] Extension Enforcement under Grounded Semantics in Abstract Argumentation.
+Andreas Niskanen, Johannes P. Wallner, and Matti Järvisalo.
+In Michael Thielscher and Francesca Toni and Frank Wolter, editors,
+In Principles of Knowledge Representation and Reasoning: Proceedings
+of the Sixteenth International Conference, {KR} 2018, Tempe, Arizona,
+30 October - 2 November 2018, pages 178-183. AAAI Press, 2018.
