@@ -1,33 +1,37 @@
-<center><h1> Deep Learning for Abstract Argumentation</h1></center>
-<hr/>
+# Deep Learning for Abstract Argumentation
 
 **Neuro-symbolic approaches to reasoning problems from abstract argumentation**
 
 This repository holds the code to produce data and experiments for using learning-based approaches to symbolic reasoning
 problems of static and dynamic abstract argumentation. The work is described in the following publications:
 
-- Deep Learning for Abstract Argumentation Semantics ([IJCAI 2020](https://www.ijcai.org/Proceedings/2020/231)) (previous code on [ijcai_2020](https://github.com/DennisCraandijk/DL-abstract-argumentation/tree/ijcai_2020) branch)
+- Deep Learning for Abstract Argumentation Semantics ([IJCAI 2020](https://www.ijcai.org/Proceedings/2020/231)) ([previous code](https://github.com/DennisCraandijk/DL-abstract-argumentation/tree/ijcai_2020))
 - Enforcement Heuristics for Argumentation with Deep Reinforcement Learning ([AAAI 2022]())
 
 Please email me for questions.
 
 ## Installation
 
-Create a virtual python 3 environment (tested with 3.8) and install
+Create a virtual python 3 environment (tested with 3.8) and install with pip or conda
 
+#### Pip
 * [pytorch](https://pytorch.org/) (tested with version 1.11)
 * [pytorch_geometric](https://github.com/rusty1s/pytorch_geometric) (tested with version 2.0.2)
-
 with the cuda/cpu settings for your system, then install the other requirements
-
 ```
 pip install -r requirements.txt
 ```
 
-or alternatively use the `conda_environment.yaml` with conda.
+#### Conda
+Alternatively use the `conda_environment.yaml` with conda.
+
+
+### AF generators
 
 Afterwards go to the `src/data/generators/vendor` directory and compile the Argumentation Framework generators
 with `./install.sh` (compiling requires Java, Ant and Maven).
+
+### Tests
 
 Optionally test the installation by running the pytest unit tests in `tests/test_components.py`
 
