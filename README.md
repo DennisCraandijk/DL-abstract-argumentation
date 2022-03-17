@@ -6,7 +6,7 @@
 This repository holds the code to produce data and experiments for using learning-based approaches to symbolic reasoning
 problems of static and dynamic abstract argumentation. The work is described in the following publications:
 
-- Deep Learning for Abstract Argumentation Semantics ([IJCAI 2020](https://www.ijcai.org/Proceedings/2020/231)) ([previous code](https://github.com/DennisCraandijk/DL-abstract-argumentation/tree/ijcai_2020))
+- Deep Learning for Abstract Argumentation Semantics ([IJCAI 2020](https://www.ijcai.org/Proceedings/2020/231)) (previous code on [ijcai_2020](https://github.com/DennisCraandijk/DL-abstract-argumentation/tree/ijcai_2020) branch)
 - Enforcement Heuristics for Argumentation with Deep Reinforcement Learning ([AAAI 2022]())
 
 Please email me for questions.
