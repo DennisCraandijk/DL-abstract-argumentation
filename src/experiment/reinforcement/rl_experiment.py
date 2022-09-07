@@ -483,7 +483,7 @@ class RLExperiment(pl.LightningModule):
                     step_count / problem.optimal_solution[self.val_env.semantics]
             )
             optimal_num = problem.optimal_solution[self.val_env.semantics]
-            optimal_time = problem.solve_times[self.val_env.semantics]
+            optimal_time = problem.optimal_solve_time[self.val_env.semantics]
             density = networkx.density(problem.af.graph)
 
             optimal_known = (
