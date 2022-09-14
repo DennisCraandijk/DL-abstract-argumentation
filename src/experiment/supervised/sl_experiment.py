@@ -14,7 +14,7 @@ from torch_geometric.loader import DataLoader
 from tqdm import tqdm
 
 import src.config as config
-from src.constants import GRD, STB, PRF, SCEPT, CRED, ENUM
+from src.constants import GRD, STB, PRF, COM, SCEPT, CRED, ENUM
 from src.experiment.supervised.dataset import (
     MemoryDS,
     AcceptanceProblemDS,
@@ -297,7 +297,7 @@ class SLExperiment(pl.LightningModule):
 
         arg_parser.add_argument(
             "--semantics",
-            choices=[GRD, PRF, STB, "CO"],
+            choices=[GRD, PRF, STB, COM],
             default=PRF,
             help="Semantics",
         )
